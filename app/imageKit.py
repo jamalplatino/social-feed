@@ -5,8 +5,8 @@ import os
 load_dotenv()
 
 imageKit = ImageKit(
-    private_key=os.getenv("IMAGEKIT_PRIVATE_KIT"),
-    public_key=os.getenv("IMAGEKIT_PUBLIC_KEY"),
-    url_endpoint=os.getenv("IMAGEKIT_URL"),
+    private_key=os.getenv("IMAGEKIT_PRIVATE_KEY")
 )
 
+# Store URL endpoint for reuse
+URL_ENDPOINT = os.environ.get("IMAGEKIT_URL_ENDPOINT")

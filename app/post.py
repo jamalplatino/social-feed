@@ -1,5 +1,7 @@
 import streamlit as st
 import requests
+from var_dump import var_dump
+from imageKit import imageKit   # now properly configured
 
 
 # --- Configuration ---
@@ -38,32 +40,39 @@ if submitted:
         # 1. Upload image to FastAPI (which forwards to ImageKit.io)
         image_url = None
         if uploaded_image is not None:
-            with st.spinner("Uploading image..."):
-                try:
-                    files = {"file": (uploaded_image.name, uploaded_image.getvalue(), uploaded_image.type)}
-                    response = requests.post(f"{API_BASE_URL}/upload-image/", files=files)
-                    response.raise_for_status()
-                    image_data = response.json()
-                    image_url = image_data.get("url")
-                    st.success("Image uploaded successfully!")
-                except requests.exceptions.RequestException as e:
-                    st.error(f"Image upload failed: {e}")
-                    st.stop()  # Stop execution if image upload fails
+            with st.spinner("Uploading image to ImageKit......"):
 
-        # 2. Prepare final post payload
+                try:
+                    # Read the file bytes
+                    file_bytes = uploaded_image.getvalue()
+                    
+                    # Upload to ImageKit
+                    upload_response = imageKit.files.upload(
+                        file=file_bytes,
+                        file_name=uploaded_image.name,
+                        folder="/posts"
+                    )
+
+                    image_url = upload_response.url
+                    st.success("Image uploaded successfully!")
+                except Exception as e:
+                    st.error(f"Image upload failed: {e}")
+                    st.stop()
+
+        # 2. Prepare post payload
         payload = {
             "subject": subject.strip(),
             "description": description.strip() if description else None,
             "tags": tags,
-            "image_url": image_url,  # None if no image was uploaded
+            "image_url": image_url,   # None if no image
             "content": content.strip()
         }
-
-        # 3. Submit the full post to FastAPI
-        with st.spinner("Submitting post..."):
+        
+        # 3. Send the post to your FastAPI backend (or save directly)
+        with st.spinner("Creating post..."):
             try:
                 response = requests.post(
-                    f"{API_BASE_URL}/create-post/",
+                    f"{API_BASE_URL}/upload",
                     json=payload,
                     headers={"Content-Type": "application/json"}
                 )
