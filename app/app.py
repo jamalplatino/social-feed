@@ -74,13 +74,15 @@ async def get_feeds(session: AsyncSession = Depends(get_async_session)):
     posts_data = []
 
     for post in posts:
+        # var_dump(post)
         posts_data.append(
             {
                 "id": str(post.id),
                 "caption": post.caption,
                 "url": post.url,
-                "file_type": post.file_type,
-                "file_name": post.file_name,
+                "description": post.description,
+                "subject": post.subject,
+                "content": post.content,
                 "created_at": post.created_at
             }
         )
